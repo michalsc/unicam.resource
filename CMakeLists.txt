@@ -4,6 +4,8 @@ project(unicam VERSION 0.3.0)
 include(cmake/verstring.cmake)
 include(cmake/sfdc.cmake)
 
+add_subdirectory(devicetree.resource EXCLUDE_FROM_ALL)
+
 get_verstring(VERSTRING)
 sfdc(sfd/unicam_lib.sfd)
 
@@ -32,3 +34,8 @@ target_link_libraries(unicam.resource unicam devicetree)
 target_include_directories(unicam INTERFACE include_pub)
 
 set_target_properties(unicam.resource PROPERTIES LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ldscript.lds)
+
+# no install for devicetree.resource itself, it goes to ROM
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sfd DESTINATION Developer)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include_pub/ DESTINATION Developer/include)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/includes/ DESTINATION Developer/include)
