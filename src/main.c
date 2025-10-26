@@ -25,11 +25,8 @@
 
 #include "unicam.h"
 
-extern UBYTE diag_start;
 extern UBYTE rom_end;
 extern UBYTE rom_start;
-extern UBYTE ramcopy_end;
-extern ULONG diag_offset;
 extern const char deviceName[];
 extern const char deviceIdString[];
 void Init();
@@ -37,7 +34,7 @@ void Init();
 const struct Resident RomTag __attribute__((used)) = {
     RTC_MATCHWORD,
     (struct Resident *)&RomTag,
-    (APTR)&ramcopy_end,
+    (APTR)&rom_end,
     RTF_COLDSTART,
     UNICAM_VERSION,
     NT_RESOURCE,
@@ -49,47 +46,3 @@ const struct Resident RomTag __attribute__((used)) = {
 
 const char deviceName[] = "unicam.resource";
 const char deviceIdString[] = VERSION_STRING;
-
-const APTR patchListRAM[] = {
-    (APTR)((intptr_t)&RomTag.rt_MatchTag),
-    (APTR)((intptr_t)&RomTag.rt_EndSkip),
-    (APTR)-1
-};
-
-const APTR patchListROM[] = {
-    (APTR)&RomTag.rt_Init,
-    (APTR)&RomTag.rt_Name,
-    (APTR)&RomTag.rt_IdString,
-    (APTR)-1
-};
-
-int DiagPoint(REGARG(APTR boardBase, "a0"), REGARG(struct DiagArea *diagCopy, "a2"), 
-              REGARG(struct ConfigDev *configDev, "a3"), REGARG(struct ExecBase *SysBase, "a6"))
-{
-    const APTR *patch = &patchListRAM[0];
-    ULONG offset = (ULONG)&diag_offset;
-
-    /* Patch parts which reside in RAM only */
-    while(*patch != (APTR)-1)
-    {
-        ULONG * address = (ULONG *)((intptr_t)*patch - offset + (ULONG)diagCopy);
-        *address += (intptr_t)diagCopy - offset;
-        patch++;
-    }
-
-    /* Patch parts which are in the ROM image */
-    patch = &patchListROM[0];
-    while(*patch != (APTR)-1)
-    {
-        ULONG * address = (ULONG *)((intptr_t)*patch - offset + (ULONG)diagCopy);
-        *address += (intptr_t)boardBase;
-        patch++;
-    }
-
-    return 1;
-}
-
-void BootPoint()
-{
-
-}
