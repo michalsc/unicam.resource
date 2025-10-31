@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14.0)
 project(unicam VERSION 0.3.0)
 
+include(cmake/bin2h.cmake)
 include(cmake/verstring.cmake)
 include(cmake/sfdc.cmake)
 
@@ -27,6 +28,8 @@ add_executable(unicam.resource
     src/getsize.c
 )
 
+bin_to_header(unicam.resource)
+
 target_compile_options(unicam.resource PRIVATE -Os -m68040 -msmall-code -mpcrel -mregparm=4 -fomit-frame-pointer)
 target_compile_definitions(unicam.resource PRIVATE VERSION_STRING="${VERSTRING}")
 target_include_directories(unicam.resource PRIVATE include)
@@ -40,4 +43,4 @@ set_target_properties(unicam.resource PROPERTIES LINK_DEPENDS ${CMAKE_CURRENT_SO
 # no install for devicetree.resource itself, it goes to ROM
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sfd DESTINATION Developer)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include_pub/ DESTINATION Developer/include)
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/includes/ DESTINATION Developer/include)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include DESTINATION Developer)
