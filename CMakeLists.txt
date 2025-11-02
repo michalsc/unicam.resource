@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14.0)
-project(unicam VERSION 0.3.0)
+project(unicam VERSION 1.0.0)
 
 include(cmake/bin2h.cmake)
 include(cmake/verstring.cmake)
