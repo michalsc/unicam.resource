@@ -176,86 +176,88 @@ void VC4_ConstructUnicamDL(struct UnicamBase *UnicamBase, ULONG kernel)
     if (unity)
     {
         /* Unity scaling is simple, reserve less space for display list */
-        cnt -= 8;
+        cnt -= 16;
 
         UnicamBase->u_UnicamDL = cnt;
 
         /* Set control reg */
-        displist[cnt++] = LE32(
+        ULONG control = 
             CONTROL_VALID
             | CONTROL_WORDS(7)
             | CONTROL_UNITY
-            | CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB)
-        );
+            | CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
 
         if (UnicamBase->u_BPP == 16)
-            displist[cnt - 1] |= LE32(CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565));
+            control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565);
         else if (UnicamBase->u_BPP == 24)
-            displist[cnt - 1] |= LE32(CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888));
+            control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888);
+
+        wr32le(&displist[cnt++], control);
 
         /* Center it on the screen */
-        displist[cnt++] = LE32(POS0_X(offset_x) | POS0_Y(offset_y) | POS0_ALPHA(0xff));
-        displist[cnt++] = LE32(POS2_H(UnicamBase->u_Size.height) | POS2_W(UnicamBase->u_Size.width) | (1 << 30));
-        displist[cnt++] = LE32(0xdeadbeef);
+        wr32le(&displist[cnt++], POS0_X(offset_x) | POS0_Y(offset_y) | POS0_ALPHA(0xff));
+        wr32le(&displist[cnt++], POS2_H(UnicamBase->u_Size.height) | POS2_W(UnicamBase->u_Size.width) | (1 << 30));
+        wr32le(&displist[cnt++], 0xdeadbeef);
 
         /* Set address */
-        displist[cnt++] = LE32(0xc0000000 | (ULONG)startAddress);
-        displist[cnt++] = LE32(0xdeadbeef);
+        wr32le(&displist[cnt++], 0xc0000000 | (ULONG)startAddress);
+        wr32le(&displist[cnt++], 0xdeadbeef);
 
         /* Pitch is full width, always */
-        displist[cnt++] = LE32(UnicamBase->u_FullSize.width * (UnicamBase->u_BPP / 8));
+        wr32le(&displist[cnt++], UnicamBase->u_FullSize.width * (UnicamBase->u_BPP / 8));
 
         /* Done */
-        displist[cnt++] = LE32(0x80000000);
+        wr32le(&displist[cnt++], 0x80000000);
     }
     else
     {
-        cnt -= 17;
+        cnt -= 32;
         
         UnicamBase->u_UnicamDL = cnt;
 
         /* Set control reg */
-        displist[cnt++] = LE32(
+        ULONG control = 
             CONTROL_VALID
             | CONTROL_WORDS(16)
             | 0x01800 
-            | CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB)
-        );
+            | CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
 
         if (UnicamBase->u_BPP == 16)
-            displist[cnt - 1] |= LE32(CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565));
+            control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565);
         else if (UnicamBase->u_BPP == 24)
-            displist[cnt - 1] |= LE32(CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888));
+            control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888);
+
+        wr32le(&displist[cnt++], control);
 
         /* Center plane on the screen */
-        displist[cnt++] = LE32(POS0_X(offset_x) | POS0_Y(offset_y) | POS0_ALPHA(0xff));
-        displist[cnt++] = LE32(POS1_H(calc_height) | POS1_W(calc_width));
-        displist[cnt++] = LE32(POS2_H(UnicamBase->u_Size.height) | POS2_W(UnicamBase->u_Size.width) |
+        wr32le(&displist[cnt++], POS0_X(offset_x) | POS0_Y(offset_y) | POS0_ALPHA(0xff));
+        wr32le(&displist[cnt++], POS1_H(calc_height) | POS1_W(calc_width));
+        wr32le(&displist[cnt++], POS2_H(UnicamBase->u_Size.height) | POS2_W(UnicamBase->u_Size.width) |
                                (SCALER_POS2_ALPHA_MODE_FIXED << SCALER_POS2_ALPHA_MODE_SHIFT));
-        displist[cnt++] = LE32(0xdeadbeef); // Scratch written by HVS
+        wr32le(&displist[cnt++], 0xdeadbeef); // Scratch written by HVS
 
         /* Set address and pitch */
-        displist[cnt++] = LE32(0xc0000000 | startAddress);
-        displist[cnt++] = LE32(0xdeadbeef);
+        wr32le(&displist[cnt++], 0xc0000000 | startAddress);
+        wr32le(&displist[cnt++], 0xdeadbeef);
 
         /* Pitch is full width, always */
-        displist[cnt++] = LE32(UnicamBase->u_FullSize.width * (UnicamBase->u_BPP / 8));
+        wr32le(&displist[cnt++], UnicamBase->u_FullSize.width * (UnicamBase->u_BPP / 8));
 
         /* LMB address */
-        displist[cnt++] = LE32(0);
+        wr32le(&displist[cnt++], 0);
 
         /* Set PPF Scaler */
-        displist[cnt++] = LE32((scale_x << 8) | (UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
-        displist[cnt++] = LE32((scale_y << 8) | (UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
-        displist[cnt++] = LE32(0); // Scratch written by HVS
+        wr32le(&displist[cnt++], (scale_x << 8) | (UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
+        wr32le(&displist[cnt++], (scale_y << 8) | (UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
+        wr32le(&displist[cnt++], 0); // Scratch written by HVS
 
-        displist[cnt++] = LE32(kernel);
-        displist[cnt++] = LE32(kernel);
-        displist[cnt++] = LE32(kernel);
-        displist[cnt++] = LE32(kernel);
+        wr32le(&displist[cnt++], kernel);
+        wr32le(&displist[cnt++], kernel);
+        wr32le(&displist[cnt++], kernel);
+        wr32le(&displist[cnt++], kernel);
 
         /* Done */
-        displist[cnt++] = LE32(0x80000000);
+        wr32le(&displist[cnt++], 0x80000000);
     }
 }
 
@@ -358,89 +360,89 @@ void VC6_ConstructUnicamDL(struct UnicamBase *UnicamBase, ULONG kernel)
     if (unity)
     {
         /* Unity scaling is simple, reserve less space for display list */
-        cnt -= 9;
+        cnt -= 16;
 
         UnicamBase->u_UnicamDL = cnt;
 
         /* Set control reg */
-        displist[cnt++] = LE32(
+        ULONG control = 
             VC6_CONTROL_VALID
             | VC6_CONTROL_WORDS(8)
             | VC6_CONTROL_UNITY
             | VC6_CONTROL_ALPHA_EXPAND
             | VC6_CONTROL_RGB_EXPAND
-            | VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB)
-        );
+            | VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
 
         if (UnicamBase->u_BPP == 16)
-            displist[cnt - 1] |= LE32(CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565));
+            control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565);
         else if (UnicamBase->u_BPP == 24)
-            displist[cnt - 1] |= LE32(CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888));
+            control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888);
+
+        wr32le(&displist[cnt++], control);
 
         /* Center it on the screen */
-        displist[cnt++] = LE32(VC6_POS0_X(offset_x) | VC6_POS0_Y(offset_y));
-        displist[cnt++] = LE32((VC6_SCALER_POS2_ALPHA_MODE_FIXED << VC6_SCALER_POS2_ALPHA_MODE_SHIFT) | VC6_SCALER_POS2_ALPHA(0xfff));
-        displist[cnt++] = LE32(VC6_POS2_H(UnicamBase->u_Size.height) | VC6_POS2_W(UnicamBase->u_Size.width));
-        displist[cnt++] = LE32(0xdeadbeef);
+        wr32le(&displist[cnt++], VC6_POS0_X(offset_x) | VC6_POS0_Y(offset_y));
+        wr32le(&displist[cnt++], (VC6_SCALER_POS2_ALPHA_MODE_FIXED << VC6_SCALER_POS2_ALPHA_MODE_SHIFT) | VC6_SCALER_POS2_ALPHA(0xfff));
+        wr32le(&displist[cnt++], VC6_POS2_H(UnicamBase->u_Size.height) | VC6_POS2_W(UnicamBase->u_Size.width));
+        wr32le(&displist[cnt++], 0xdeadbeef);
 
         /* Set address */
-        displist[cnt++] = LE32(0xc0000000 | startAddress);
-        displist[cnt++] = LE32(0xdeadbeef);
+        wr32le(&displist[cnt++], 0xc0000000 | startAddress);
+        wr32le(&displist[cnt++], 0xdeadbeef);
 
         /* Pitch is full width, always */
-        displist[cnt++] = LE32(UnicamBase->u_FullSize.width * (UnicamBase->u_BPP / 8));
+        wr32le(&displist[cnt++], UnicamBase->u_FullSize.width * (UnicamBase->u_BPP / 8));
 
         /* Done */
-        displist[cnt++] = LE32(0x80000000);
+        wr32le(&displist[cnt++], 0x80000000);
     }
     else
     {
-        cnt -= 18;
+        cnt -= 24;
         
         UnicamBase->u_UnicamDL = cnt;
 
         /* Set control reg */
-        displist[cnt++] = LE32(
+        ULONG control = 
             VC6_CONTROL_VALID
             | VC6_CONTROL_WORDS(17)
             | VC6_CONTROL_ALPHA_EXPAND
             | VC6_CONTROL_RGB_EXPAND
-            | VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB)
-        );
+            | VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
 
         if (UnicamBase->u_BPP == 16)
-            displist[cnt - 1] |= LE32(CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565));
+            control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565);
         else if (UnicamBase->u_BPP == 24)
-            displist[cnt - 1] |= LE32(CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888));
+            control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888);
 
         /* Center plane on the screen */
-        displist[cnt++] = LE32(VC6_POS0_X(offset_x) | VC6_POS0_Y(offset_y));
-        displist[cnt++] = LE32((VC6_SCALER_POS2_ALPHA_MODE_FIXED << VC6_SCALER_POS2_ALPHA_MODE_SHIFT) | VC6_SCALER_POS2_ALPHA(0xfff));
-        displist[cnt++] = LE32(VC6_POS1_H(calc_height) | VC6_POS1_W(calc_width));
-        displist[cnt++] = LE32(VC6_POS2_H(UnicamBase->u_Size.height) | VC6_POS2_W(UnicamBase->u_Size.width));
-        displist[cnt++] = LE32(0xdeadbeef); // Scratch written by HVS
+        wr32le(&displist[cnt++], VC6_POS0_X(offset_x) | VC6_POS0_Y(offset_y));
+        wr32le(&displist[cnt++], (VC6_SCALER_POS2_ALPHA_MODE_FIXED << VC6_SCALER_POS2_ALPHA_MODE_SHIFT) | VC6_SCALER_POS2_ALPHA(0xfff));
+        wr32le(&displist[cnt++], VC6_POS1_H(calc_height) | VC6_POS1_W(calc_width));
+        wr32le(&displist[cnt++], VC6_POS2_H(UnicamBase->u_Size.height) | VC6_POS2_W(UnicamBase->u_Size.width));
+        wr32le(&displist[cnt++], 0xdeadbeef); // Scratch written by HVS
 
         /* Set address and pitch */
-        displist[cnt++] = LE32(0xc0000000 | startAddress);
-        displist[cnt++] = LE32(0xdeadbeef);
+        wr32le(&displist[cnt++], 0xc0000000 | startAddress);
+        wr32le(&displist[cnt++], 0xdeadbeef);
 
         /* Pitch is full width, always */
-        displist[cnt++] = LE32(UnicamBase->u_FullSize.width * (UnicamBase->u_BPP / 8));
+        wr32le(&displist[cnt++], UnicamBase->u_FullSize.width * (UnicamBase->u_BPP / 8));
 
         /* LMB address */
-        displist[cnt++] = LE32(0);
+        wr32le(&displist[cnt++], 0);
 
         /* Set PPF Scaler */
-        displist[cnt++] = LE32((scale_x << 8) | ((ULONG)UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
-        displist[cnt++] = LE32((scale_y << 8) | ((ULONG)UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
-        displist[cnt++] = LE32(0); // Scratch written by HVS
+        wr32le(&displist[cnt++], (scale_x << 8) | ((ULONG)UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
+        wr32le(&displist[cnt++], (scale_y << 8) | ((ULONG)UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
+        wr32le(&displist[cnt++], 0); // Scratch written by HVS
 
-        displist[cnt++] = LE32(kernel);
-        displist[cnt++] = LE32(kernel);
-        displist[cnt++] = LE32(kernel);
-        displist[cnt++] = LE32(kernel);
+        wr32le(&displist[cnt++], kernel);
+        wr32le(&displist[cnt++], kernel);
+        wr32le(&displist[cnt++], kernel);
+        wr32le(&displist[cnt++], kernel);
 
         /* Done */
-        displist[cnt++] = LE32(0x80000000);
+        wr32le(&displist[cnt++], 0x80000000);
     }
 }
