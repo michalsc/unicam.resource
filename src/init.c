@@ -457,7 +457,7 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
             {
                 const ULONG size = sizeof(ULONG) * UNICAM_HEIGHT * UNICAM_WIDTH + 512;
                 
-                UnicamBase->u_ReceiveBuffer = AllocMem(size, MEMF_FAST | MEMF_REVERSE);
+                UnicamBase->u_ReceiveBuffer = AllocMem(size, MEMF_FAST);
                 UnicamBase->u_ReceiveBufferSize = size;
 
                 UnicamBase->u_ReceiveBuffer = (APTR)(((ULONG)UnicamBase->u_ReceiveBuffer + 63) & ~63);
