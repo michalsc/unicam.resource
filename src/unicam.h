@@ -67,6 +67,11 @@ static inline uint64_t LE64(uint64_t x) { return __builtin_bswap64(x); }
 static inline uint32_t LE32(uint32_t x) { return __builtin_bswap32(x); }
 static inline uint16_t LE16(uint16_t x) { return __builtin_bswap16(x); }
 
+static inline void wr32le(volatile ULONG *addr, ULONG value) {
+    *addr = LE32(value);
+    asm volatile("nop");
+}
+
 void kprintf(REGARG(const char * msg, "a0"), REGARG(void * args, "a1"));
 
 #define bug(string, ...) \
