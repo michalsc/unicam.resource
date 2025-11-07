@@ -415,6 +415,8 @@ void VC6_ConstructUnicamDL(struct UnicamBase *UnicamBase, ULONG kernel)
         else if (UnicamBase->u_BPP == 24)
             control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB888);
 
+        wr32le(&displist[cnt++], control);
+
         /* Center plane on the screen */
         wr32le(&displist[cnt++], VC6_POS0_X(offset_x) | VC6_POS0_Y(offset_y));
         wr32le(&displist[cnt++], (VC6_SCALER_POS2_ALPHA_MODE_FIXED << VC6_SCALER_POS2_ALPHA_MODE_SHIFT) | VC6_SCALER_POS2_ALPHA(0xfff));
