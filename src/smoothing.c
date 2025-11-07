@@ -59,9 +59,9 @@ void compute_scaling_kernel(ULONG *dlist_memory, LONG b, LONG c)
 
     for (int i=0; i<11; i++) {
         if (i < 6) {
-            dlist_memory[i] = LE32(half_kernel[i]);
+            wr32le(&dlist_memory[i], half_kernel[i]);
         } else {
-            dlist_memory[i] = LE32(half_kernel[11 - i - 1]);
+            wr32le(&dlist_memory[i], half_kernel[11 - i - 1]);
         }
     }
 }
@@ -78,9 +78,9 @@ void compute_nearest_neighbour_kernel(ULONG *dlist_memory)
 
     for (int i=0; i<11; i++) {
         if (i < 6) {
-            dlist_memory[i] = LE32(half_kernel[i]);
+            wr32le(&dlist_memory[i], half_kernel[i]);
         } else {
-            dlist_memory[i] = LE32(half_kernel[11 - i - 1]);
+            wr32le(&dlist_memory[i], half_kernel[11 - i - 1]);
         }
     }
 }
