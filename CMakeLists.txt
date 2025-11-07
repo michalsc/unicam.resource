@@ -9,6 +9,10 @@ if(NOT TARGET devicetree)
     add_subdirectory(devicetree.resource EXCLUDE_FROM_ALL)
 endif()
 
+if (NOT TARGET mailbox)
+    add_subdirectory(mailbox.resource EXCLUDE_FROM_ALL)
+endif()
+
 get_verstring(VERSTRING)
 sfdc(sfd/unicam_lib.sfd)
 
@@ -34,7 +38,7 @@ target_compile_options(unicam.resource PRIVATE -Os -m68040 -msmall-code -mpcrel 
 target_compile_definitions(unicam.resource PRIVATE VERSION_STRING="${VERSTRING}")
 target_include_directories(unicam.resource PRIVATE include)
 target_link_options(unicam.resource PRIVATE -ffreestanding -nostdlib -nostartfiles -s -Wl,-e_rom_start -Wl,-T${CMAKE_CURRENT_SOURCE_DIR}/ldscript.lds)
-target_link_libraries(unicam.resource unicam devicetree)
+target_link_libraries(unicam.resource unicam devicetree mailbox)
 
 target_include_directories(unicam INTERFACE include_pub)
 
