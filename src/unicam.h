@@ -30,14 +30,11 @@ struct Point {
 
 struct UnicamBase {
     struct Library      u_Node;
-    struct Library *    u_MailboxBase;
+    APTR                u_MailboxBase;
     struct ExecBase *   u_SysBase;
     APTR                u_ROMBase;
     struct ConfigDev *  u_ConfigDev;
-    APTR                u_MailBox;
     APTR                u_PeriphBase;
-    ULONG *             u_Request;
-    APTR                u_RequestBase;
     APTR                u_ReceiveBuffer;
     ULONG               u_ReceiveBufferSize;
     struct Size         u_DisplaySize;

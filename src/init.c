@@ -32,6 +32,7 @@ int _strcmp(const char *s1, const char *s2);
 APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
 {
     struct DeviceTreeBase *DeviceTreeBase = NULL;
+    struct MailboxBase *MailboxBase = NULL;
     struct ExpansionBase *ExpansionBase = NULL;
     struct UnicamBase *UnicamBase = NULL;
     struct CurrentBinding binding;
@@ -39,8 +40,9 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
     bug("[unicam] Init\n");
 
     DeviceTreeBase = OpenResource("devicetree.resource");
+    MailboxBase = OpenResource("mailbox.resource");
 
-    if (DeviceTreeBase != NULL)
+    if (DeviceTreeBase != NULL && MailboxBase != NULL)
     {
         APTR base_pointer = NULL;
     
@@ -69,6 +71,7 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
 
             UnicamBase = (struct UnicamBase *)((UBYTE *)base_pointer + BASE_NEG_SIZE);
             UnicamBase->u_SysBase = SysBase;
+            UnicamBase->u_MailboxBase = MailboxBase;
 
             MakeFunctions(UnicamBase, relFuncTable, 0);
 
@@ -82,9 +85,6 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
             UnicamBase->u_Node.lib_Version = UNICAM_VERSION;
             UnicamBase->u_Node.lib_Revision = UNICAM_REVISION;
             UnicamBase->u_Node.lib_IdString = (STRPTR)deviceIdString;
-
-            UnicamBase->u_RequestBase = AllocMem(256*4, MEMF_FAST);
-            UnicamBase->u_Request = (ULONG *)(((intptr_t)UnicamBase->u_RequestBase + 127) & ~127);
 
             UnicamBase->u_IsVC6 = 0;
             UnicamBase->u_Offset.x = 0;
@@ -364,42 +364,6 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
                 }
             }
 
-            /* Get VC4 physical address of mailbox interface. Subsequently it will be translated to m68k physical address */
-            key = DT_OpenKey("/aliases");
-            if (key)
-            {
-                CONST_STRPTR mbox_alias = DT_GetPropValue(DT_FindProperty(key, "mailbox"));
-
-                DT_CloseKey(key);
-               
-                if (mbox_alias != NULL)
-                {
-                    key = DT_OpenKey(mbox_alias);
-
-                    if (key)
-                    {
-                        int size_cells = 1;
-                        int address_cells = 1;
-
-                        const ULONG * siz = GetPropValueRecursive(key, "#size-cells", DeviceTreeBase);
-                        const ULONG * addr = GetPropValueRecursive(key, "#address-cells", DeviceTreeBase);
-
-                        if (siz != NULL)
-                            size_cells = *siz;
-                        
-                        if (addr != NULL)
-                            address_cells = *addr;
-
-                        const ULONG *reg = DT_GetPropValue(DT_FindProperty(key, "reg"));
-
-                        UnicamBase->u_MailBox = (APTR)reg[address_cells - 1];
-
-                        DT_CloseKey(key);
-                    }
-                }
-                DT_CloseKey(key);
-            }
-
             /* Open /soc key and learn about VC4 to CPU mapping. Use it to adjust the addresses obtained above */
             key = DT_OpenKey("/soc");
             if (key)
@@ -426,16 +390,12 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
                 ULONG phys_vc4 = reg[address_cells - 1];
                 ULONG phys_cpu = reg[address_cells + cpu_address_cells - 1];
 
-                if (UnicamBase->u_MailBox != 0) {
-                    UnicamBase->u_MailBox = (APTR)((ULONG)UnicamBase->u_MailBox - phys_vc4 + phys_cpu);
-                }
-
                 UnicamBase->u_PeriphBase = (APTR)phys_cpu;
 
                 DT_CloseKey(key);
             }
 
-            bug("[unicam] Periph base: %08lx, Mailbox: %08lx\n", (ULONG)UnicamBase->u_PeriphBase, (ULONG)UnicamBase->u_MailBox);
+            bug("[unicam] Periph base: %08lx\n", (ULONG)UnicamBase->u_PeriphBase);
 
             UnicamBase->u_ReceiveBuffer = NULL;
             /* Get location of receive buffer. If it does not exist, reserve it now */
