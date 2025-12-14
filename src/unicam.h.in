@@ -55,7 +55,12 @@ struct UnicamBase {
     UBYTE               u_BPP;
     BOOL                u_StartOnBoot;
     BOOL                u_IsVC6;
+    UBYTE               u_Type;
+    UBYTE               u_PixelOrder;
 };
+
+#define TYPE_FT     0
+#define TYPE_C790   1
 
 #define UNICAM_FUNC_COUNT   14
 #define BASE_NEG_SIZE       ((UNICAM_FUNC_COUNT) * 6)
@@ -70,11 +75,18 @@ static inline void wr32le(volatile ULONG *addr, ULONG value) {
     asm volatile("nop");
 }
 
+static inline ULONG rd32le(volatile ULONG *addr) {
+    ULONG val = LE32(*addr);
+    asm volatile("nop");
+    return val;
+}
+
 void kprintf(REGARG(const char * msg, "a0"), REGARG(void * args, "a1"));
 
 #define bug(string, ...) \
     do { ULONG args[] = {0, __VA_ARGS__}; kprintf(string, &args[1]); } while(0)
 
+void init_c790_ic(struct UnicamBase * UnicamBase);
 void unicam_run(ULONG *address , UBYTE lanes, UBYTE datatype, ULONG width , ULONG height , UBYTE bbp, struct UnicamBase * UnicamBase);
 void unicam_stop(struct UnicamBase * UnicamBase);
 void setup_csiclk(struct UnicamBase * UnicamBase);

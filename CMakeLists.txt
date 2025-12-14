@@ -24,6 +24,7 @@ add_executable(unicam.resource
     src/start.c
     src/stop.c
     src/unicam.c
+    src/c790.c
     src/videocore.c
     src/getframebuffer.c
     src/getcropsize.c

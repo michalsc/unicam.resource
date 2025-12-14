@@ -108,250 +108,61 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
 
             SumLibrary((struct Library*)UnicamBase);
 
+            key = DT_OpenKey("/emu68/unicam");
+
             const char *cmdline = DT_GetPropValue(DT_FindProperty(DT_OpenKey("/chosen"), "bootargs"));
             const char *cmd;
 
-            if (FindToken(cmdline, "unicam.boot"))
+            if (_strcmp(DT_GetPropValue(DT_FindProperty(key, "status")), "okay") == 0)
             {
                 start_on_boot = 1;
                 UnicamBase->u_StartOnBoot = TRUE;
                 bug("[unicam] Starting HDMI passthrough on boot\n");
             }
 
-            if (FindToken(cmdline, "unicam.integer"))
+            if (DT_FindProperty(key, "integer-scaling"))
             {
                 UnicamBase->u_Integer = 1;
                 bug("[unicam] Use integer scaling\n");
             }
 
-            if ((cmd = FindToken(cmdline, "unicam.b=")))
-            {
-                ULONG val = 0;
+            ULONG kernel = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "kernel"));
+            UnicamBase->u_KernelB = kernel >> 16;
+            UnicamBase->u_KernelC = kernel & 0xffff;
+            UnicamBase->u_Aspect = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "aspect-ratio"));
 
-                for (int i=0; i < 4; i++)
-                {
-                    if (cmd[9 + i] < '0' || cmd[9 + i] > '9')
-                        break;
-
-                    val = val * 10 + cmd[9 + i] - '0';
-                }
-
-                if (val > 1000)
-                    val = 1000;
-                
-                UnicamBase->u_KernelB = val;   
-            }
-
-            if ((cmd = FindToken(cmdline, "unicam.c=")))
-            {
-                ULONG val = 0;
-
-                for (int i=0; i < 4; i++)
-                {
-                    if (cmd[9 + i] < '0' || cmd[9 + i] > '9')
-                        break;
-
-                    val = val * 10 + cmd[9 + i] - '0';
-                }
-
-                if (val > 1000)
-                    val = 1000;
-                
-                UnicamBase->u_KernelC = val;
-            }
-
-            if ((cmd = FindToken(cmdline, "unicam.aspect=")))
-            {
-                ULONG val = 0;
-
-                for (int i=0; i < 5; i++)
-                {
-                    if (cmd[14 + i] < '0' || cmd[14 + i] > '9')
-                        break;
-
-                    val = val * 10 + cmd[14 + i] - '0';
-                }
-
-                if (val > 3000)
-                    val = 3000;
-                if (val < 333)
-                    val = 333;
-
-                UnicamBase->u_Aspect = val;
-            }
-
-            if (FindToken(cmdline, "unicam.smooth"))
+            if (DT_FindProperty(key, "smoothing"))
             {
                 UnicamBase->u_Smooth = 1;
                 bug("[unicam] Enable smoothing kernel. B=%ld, C=%ld\n", UnicamBase->u_KernelB, UnicamBase->u_KernelC);
             }
 
-            if ((cmd = FindToken(cmdline, "unicam.scaler=")))
-            {
-                UnicamBase->u_Scaler = (cmd[14] - '0') & 3;
-            }
-
-            if ((cmd = FindToken(cmdline, "unicam.phase=")))
-            {
-                ULONG val = 0;
-
-                for (int i=0; i < 3; i++)
-                {
-                    if (cmd[13 + i] < '0' || cmd[13 + i] > '9')
-                        break;
-
-                    val = val * 10 + cmd[13 + i] - '0';
-                }
-
-                if (val > 255)
-                    val = 255;
-                
-                UnicamBase->u_Phase = val;
-            }
+            ULONG scaler = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "scaler"));
+            UnicamBase->u_Scaler = scaler >> 16;
+            UnicamBase->u_Phase = scaler & 0xffff;
 
             bug("[unicam] Scaler=%ld, Phase=%ld\n", UnicamBase->u_Scaler, UnicamBase->u_Phase);
 
-            if ((cmd = FindToken(cmdline, "unicam.mode=")))
-            {
-                ULONG w = 0, h = 0, m = 0, bpp = 0;
-                const char *c = &cmd[12];
+            ULONG full_size = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "full-size"));
+            UnicamBase->u_FullSize.width = full_size >> 16;
+            UnicamBase->u_FullSize.height = full_size & 0xffff;
 
-                for (int i = 0; i < 4; i++)
-                {
-                    if (*c < '0' || *c > '9')
-                    {
-                        break;
-                    }
-                    w = w * 10 + *c++ - '0';
-                }
+            ULONG size = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "size"));
+            UnicamBase->u_Size.width = size >> 16;
+            UnicamBase->u_Size.height = size & 0xffff;
 
-                if (w != 0 && *c++ == ',')
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (*c < '0' || *c > '9')
-                        {
-                            break;
-                        }
-                        h = h * 10 + *c++ - '0';
-                    }
-                }
+            ULONG offset = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "offset"));
+            UnicamBase->u_Offset.x = offset >> 16;
+            UnicamBase->u_Offset.y = offset & 0xffff;
 
-                if (*c++ == ',')
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (*c < '0' || *c > '9')
-                        {
-                            break;
-                        }
-                        m = m * 10 + *c++ - '0';
-                    }
-                }
-
-                if (*c++ == ',')
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (*c < '0' || *c > '9')
-                        {
-                            break;
-                        }
-                        bpp = bpp * 10 + *c++ - '0';
-                    }
-                }
-
-                if (w != 0 && h != 0)
-                {
-                    UnicamBase->u_FullSize.width = w;
-                    UnicamBase->u_FullSize.height = h;
-                    bug("[unicam] Overriding FullSize to %ld x %ld\n", UnicamBase->u_FullSize.width, UnicamBase->u_FullSize.height);
-                }
-                if (m != 0)
-                {
-                    UnicamBase->u_Mode = m;
-                    bug("[unicam] Overriding mode to %lx\n", UnicamBase->u_Mode);
-                }
-                if (bpp != 0)
-                {
-                    UnicamBase->u_BPP = bpp;
-                    bug("[unicam] Overriding bpp to %ld\n", UnicamBase->u_BPP);
-                }
-            }
-
-            if ((cmd = FindToken(cmdline, "unicam.size=")))
-            {
-                ULONG x = 0, y = 0;
-                const char *c = &cmd[12];
-
-                for (int i=0; i < 4; i++)
-                {
-                    if (*c < '0' || *c > '9')
-                    {
-                        break;
-                    }
-                    x = x * 10 + *c++ - '0';
-                }
-
-                if (x != 0 && *c++ == ',')
-                {
-                    for (int i=0; i < 4; i++)
-                    {
-                        if (*c < '0' || *c > '9')
-                        {
-                            break;
-                        }
-                        y = y * 10 + *c++ - '0';
-                    }   
-                }
-
-                if (x != 0 && y != 0 && x <= UnicamBase->u_FullSize.width && y <= UnicamBase->u_FullSize.height)
-                {
-                    UnicamBase->u_Size.width = x;
-                    UnicamBase->u_Size.height = y;
-                }
-            }
+            UnicamBase->u_Mode = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "mode"));
+            UnicamBase->u_BPP = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "bpp"));
+            UnicamBase->u_Type = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "type"));
+            UnicamBase->u_PixelOrder = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "pixel-order"));
 
             bug("[unicam] Displayed size: %ld x %ld\n", UnicamBase->u_Size.width, UnicamBase->u_Size.height);
-
-            if ((cmd = FindToken(cmdline, "unicam.offset=")))
-            {
-                ULONG x = 0, y = 0;
-                const char *c = &cmd[14];
-
-                for (int i=0; i < 4; i++)
-                {
-                    if (*c < '0' || *c > '9')
-                    {
-                        break;
-                    }
-                    x = x * 10 + *c++ - '0';
-                }
-
-                if (*c++ == ',')
-                {
-                    for (int i=0; i < 4; i++)
-                    {
-                        if (*c < '0' || *c > '9')
-                        {
-                            break;
-                        }
-                        y = y * 10 + *c++ - '0';
-                    }   
-                }
-
-                if ((x + UnicamBase->u_Size.width) <= UnicamBase->u_FullSize.width)
-                {
-                    UnicamBase->u_Offset.x = x;
-                }
-
-                if ((y + UnicamBase->u_Size.height) <= UnicamBase->u_FullSize.height)
-                {
-                    UnicamBase->u_Offset.y = y;
-                }
-            }
-
             bug("[unicam] Display offset: %ld, %ld\n", UnicamBase->u_Offset.x, UnicamBase->u_Offset.y);
+            bug("[unicam] Type: %s\n", (ULONG)(UnicamBase->u_Type == 0 ? "FrameThrower" : "C790"));
 
             key = DT_OpenKey("/gpu");
             if (key)
@@ -442,6 +253,10 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
 
                 bug("[unicam] DisplayList at %08lx\n", (ULONG)dlistPtr);
                 
+                if (UnicamBase->u_Type == TYPE_C790) {
+                    init_c790_ic(UnicamBase);
+                }
+
                 UnicamStart(UnicamBase->u_ReceiveBuffer, 1, 
                     UnicamBase->u_Mode, 
                     UnicamBase->u_FullSize.width, UnicamBase->u_FullSize.height,
