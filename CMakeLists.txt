@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14.0)
-project(unicam VERSION 1.0.0)
+project(unicam VERSION 1.2.0)
 
 include(cmake/bin2h.cmake)
 include(cmake/verstring.cmake)
@@ -30,6 +30,8 @@ add_executable(unicam.resource
     src/getkernel.c
     src/getconfig.c
     src/getsize.c
+    src/constructdl.c
+    src/setconfig.c
 )
 
 bin_to_header(unicam.resource)
@@ -43,6 +45,8 @@ target_link_libraries(unicam.resource unicam devicetree mailbox)
 target_include_directories(unicam INTERFACE include_pub)
 
 set_target_properties(unicam.resource PROPERTIES LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ldscript.lds)
+
+configure_file(src/unicam.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/unicam.h)
 
 # no install for devicetree.resource itself, it goes to ROM
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sfd DESTINATION Developer)

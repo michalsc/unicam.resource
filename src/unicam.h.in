@@ -9,8 +9,8 @@
 #include <stdint.h>
 #include <resources/unicam.h>
 
-#define UNICAM_VERSION  0
-#define UNICAM_REVISION 2
+#define UNICAM_VERSION  ${PROJECT_VERSION_MAJOR}
+#define UNICAM_REVISION ${PROJECT_VERSION_MINOR}
 #define UNICAM_PRIORITY 118
 
 #define UNICAM_MODE     0x22
@@ -57,7 +57,7 @@ struct UnicamBase {
     BOOL                u_IsVC6;
 };
 
-#define UNICAM_FUNC_COUNT   10
+#define UNICAM_FUNC_COUNT   14
 #define BASE_NEG_SIZE       ((UNICAM_FUNC_COUNT) * 6)
 #define BASE_POS_SIZE       (sizeof(struct UnicamBase))
 
@@ -91,5 +91,9 @@ ULONG L_UnicamGetKernel(REGARG(struct UnicamBase * UnicamBase, "a6"));
 ULONG L_UnicamGetConfig(REGARG(struct UnicamBase * UnicamBase, "a6"));
 ULONG L_UnicamGetSize(REGARG(struct UnicamBase * UnicamBase, "a6"));
 ULONG L_UnicamGetMode(REGARG(struct UnicamBase * UnicamBase, "a6"));
+ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"), REGARG(struct UnicamBase * UnicamBase, "a6"));
+void L_UnicamSetConfig(REGARG(ULONG cfg, "d0"), REGARG(struct UnicamBase * UnicamBase, "a6"));
+void L_UnicamSetCropSize(REGARG(UWORD width, "d0"), REGARG(UWORD height, "d1"), REGARG(struct UnicamBase * UnicamBase, "a6"));
+void L_UnicamSetCropOffset(REGARG(ULONG x, "d0"), REGARG(ULONG y, "d1"), REGARG(struct UnicamBase * UnicamBase, "a6"));
 
 #endif /* _UNICAM_H */
