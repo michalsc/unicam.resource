@@ -27,7 +27,6 @@ ULONG L_UnicamGetCropOffset(REGARG(struct UnicamBase * UnicamBase, "a6"))
     return offset;
 }
 
-
 void L_UnicamSetCropSize(REGARG(UWORD width, "d0"), REGARG(UWORD height, "d1"), REGARG(struct UnicamBase * UnicamBase, "a6"))
 {
     if (width <= UnicamBase->u_FullSize.width && height <= UnicamBase->u_FullSize.height) {

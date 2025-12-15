@@ -71,7 +71,10 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
             relFuncTable[11] = (ULONG)&L_UnicamSetConfig;
             relFuncTable[12] = (ULONG)&L_UnicamSetCropSize;
             relFuncTable[13] = (ULONG)&L_UnicamSetCropOffset;
-            relFuncTable[14] = (ULONG)-1;
+            relFuncTable[14] = (ULONG)&L_UnicamSetKernel;
+            relFuncTable[15] = (ULONG)&L_UnicamGetAspect;
+            relFuncTable[16] = (ULONG)&L_UnicamSetAspect;
+            relFuncTable[17] = (ULONG)-1;
 
             UnicamBase = (struct UnicamBase *)((UBYTE *)base_pointer + BASE_NEG_SIZE);
             UnicamBase->u_SysBase = SysBase;

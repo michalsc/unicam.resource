@@ -20,3 +20,19 @@ ULONG L_UnicamGetKernel(REGARG(struct UnicamBase * UnicamBase, "a6"))
     
     return kernel;
 }
+
+void L_UnicamSetKernel(REGARG(UWORD b, "d0"), REGARG(UWORD c, "d1"), REGARG(struct UnicamBase * UnicamBase, "a6"))
+{
+    UnicamBase->u_KernelB = b;
+    UnicamBase->u_KernelC = c;
+}
+
+void L_UnicamSetAspect(REGARG(UWORD aspect, "d0"), REGARG(struct UnicamBase * UnicamBase, "a6"))
+{
+    UnicamBase->u_Aspect = aspect;
+}
+
+UWORD L_UnicamGetAspect(REGARG(struct UnicamBase * UnicamBase, "a6"))
+{
+    return UnicamBase->u_Aspect;
+}

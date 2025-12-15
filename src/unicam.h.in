@@ -62,7 +62,7 @@ struct UnicamBase {
 #define TYPE_FT     0
 #define TYPE_C790   1
 
-#define UNICAM_FUNC_COUNT   14
+#define UNICAM_FUNC_COUNT   17
 #define BASE_NEG_SIZE       ((UNICAM_FUNC_COUNT) * 6)
 #define BASE_POS_SIZE       (sizeof(struct UnicamBase))
 
@@ -70,21 +70,23 @@ static inline uint64_t LE64(uint64_t x) { return __builtin_bswap64(x); }
 static inline uint32_t LE32(uint32_t x) { return __builtin_bswap32(x); }
 static inline uint16_t LE16(uint16_t x) { return __builtin_bswap16(x); }
 
+void kprintf(REGARG(const char * msg, "a0"), REGARG(void * args, "a1"));
+
+#define bug(string, ...) \
+    do { ULONG args[] = {0, __VA_ARGS__}; kprintf(string, &args[1]); } while(0)
+
 static inline void wr32le(volatile ULONG *addr, ULONG value) {
     *addr = LE32(value);
     asm volatile("nop");
+    bug("[unicam] wr32le(%08lx, %08lx)\n", (ULONG)addr, value);
 }
 
 static inline ULONG rd32le(volatile ULONG *addr) {
     ULONG val = LE32(*addr);
     asm volatile("nop");
+    bug("[unicam] rd32le(%08lx) -> %08lx\n", (ULONG)addr, val);
     return val;
 }
-
-void kprintf(REGARG(const char * msg, "a0"), REGARG(void * args, "a1"));
-
-#define bug(string, ...) \
-    do { ULONG args[] = {0, __VA_ARGS__}; kprintf(string, &args[1]); } while(0)
 
 void init_c790_ic(struct UnicamBase * UnicamBase);
 void unicam_run(ULONG *address , UBYTE lanes, UBYTE datatype, ULONG width , ULONG height , UBYTE bbp, struct UnicamBase * UnicamBase);
@@ -107,5 +109,8 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
 void L_UnicamSetConfig(REGARG(ULONG cfg, "d0"), REGARG(struct UnicamBase * UnicamBase, "a6"));
 void L_UnicamSetCropSize(REGARG(UWORD width, "d0"), REGARG(UWORD height, "d1"), REGARG(struct UnicamBase * UnicamBase, "a6"));
 void L_UnicamSetCropOffset(REGARG(ULONG x, "d0"), REGARG(ULONG y, "d1"), REGARG(struct UnicamBase * UnicamBase, "a6"));
+void L_UnicamSetKernel(REGARG(UWORD b, "d0"), REGARG(UWORD c, "d1"), REGARG(struct UnicamBase * UnicamBase, "a6"));
+UWORD L_UnicamGetAspect(REGARG(struct UnicamBase * UnicamBase, "a6"));
+void L_UnicamSetAspect(REGARG(UWORD aspect, "d0"), REGARG(struct UnicamBase * UnicamBase, "a6"));
 
 #endif /* _UNICAM_H */

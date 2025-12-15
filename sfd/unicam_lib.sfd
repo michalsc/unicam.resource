@@ -21,4 +21,7 @@ ULONG UnicamConstructDL(ULONG *base_address, ULONG start_offset) (A0,D0)
 void UnicamSetConfig(ULONG cfg) (D0)
 void UnicamSetCropSize(UWORD width, UWORD height) (D0,D1)
 void UnicamSetCropOffset(UWORD x, UWORD y) (D0,D1)
+void UnicamSetKernel(UWORD b, UWORD c) (D0,D1)
+UWORD UnicamGetAspect() ()
+void UnicamSetAspect(UWORD aspect) (D0)
 ==end

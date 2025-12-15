@@ -15,8 +15,8 @@
 
 void L_UnicamSetConfig(REGARG(ULONG cfg, "d0"), REGARG(struct UnicamBase * UnicamBase, "a6"))
 {
-    UnicamBase->u_Integer = (cfg | UNICAMF_INTEGER) != 0;
-    UnicamBase->u_Smooth = (cfg | UNICAMF_SMOOTHING) != 0;
+    UnicamBase->u_Integer = (cfg & UNICAMF_INTEGER) != 0;
+    UnicamBase->u_Smooth = (cfg & UNICAMF_SMOOTHING) != 0;
     UnicamBase->u_Scaler = (cfg & UNICAMF_SCALER) >> UNICAMB_SCALER;
     UnicamBase->u_Phase = (cfg & UNICAMF_PHASE) >> UNICAMB_PHASE;
 }

@@ -197,7 +197,7 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
             wr32le(&base[cnt++], (scale_y << 8) | ((ULONG)UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
             wr32le(&base[cnt++], 0); // Scratch written by HVS
 
-            kernel_loc = cnt + 5;
+            kernel_loc = offset + cnt + 5;
             
             wr32le(&base[cnt++], kernel_loc);
             wr32le(&base[cnt++], kernel_loc);
@@ -244,7 +244,7 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
             wr32le(&base[cnt++], (scale_y << 8) | (UnicamBase->u_Scaler << 30) | UnicamBase->u_Phase);
             wr32le(&base[cnt++], 0); // Scratch written by HVS
 
-            kernel_loc = cnt + 5;
+            kernel_loc = offset + cnt + 5;
 
             wr32le(&base[cnt++], kernel_loc);
             wr32le(&base[cnt++], kernel_loc);
