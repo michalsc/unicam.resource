@@ -98,8 +98,12 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
                 | VC6_CONTROL_WORDS(8)
                 | VC6_CONTROL_UNITY
                 | VC6_CONTROL_ALPHA_EXPAND
-                | VC6_CONTROL_RGB_EXPAND
-                | VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
+                | VC6_CONTROL_RGB_EXPAND;
+            
+            if (UnicamBase->u_PixelOrder == 0)
+                control |= VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
+            else
+                control |= VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XBGR);
 
             if (UnicamBase->u_BPP == 16)
                 control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565);
@@ -129,8 +133,12 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
             ULONG control = 
                 CONTROL_VALID
                 | CONTROL_WORDS(7)
-                | CONTROL_UNITY
-                | CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
+                | CONTROL_UNITY;
+
+            if (UnicamBase->u_PixelOrder == 0)
+                control |= CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
+            else
+                control |= CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XBGR);
 
             if (UnicamBase->u_BPP == 16)
                 control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565);
@@ -165,8 +173,12 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
                 VC6_CONTROL_VALID
                 | VC6_CONTROL_WORDS(17)
                 | VC6_CONTROL_ALPHA_EXPAND
-                | VC6_CONTROL_RGB_EXPAND
-                | VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
+                | VC6_CONTROL_RGB_EXPAND;
+            
+            if (UnicamBase->u_PixelOrder == 0)
+                control |= VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
+            else
+                control |= VC6_CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XBGR);
 
             if (UnicamBase->u_BPP == 16)
                 control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565);
@@ -212,8 +224,12 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
             ULONG control = 
                 CONTROL_VALID
                 | CONTROL_WORDS(16)
-                | 0x01800 
-                | CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
+                | 0x01800;
+
+            if (UnicamBase->u_PixelOrder == 0)
+                control |= CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XRGB);
+            else
+                control |= CONTROL_PIXEL_ORDER(HVS_PIXEL_ORDER_XBGR);
 
             if (UnicamBase->u_BPP == 16)
                 control |= CONTROL_FORMAT(HVS_PIXEL_FORMAT_RGB565);

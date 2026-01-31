@@ -96,10 +96,10 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
             UnicamBase->u_IsVC6 = 0;
             UnicamBase->u_Offset.x = 0;
             UnicamBase->u_Offset.y = 0;
-            UnicamBase->u_FullSize.width = UNICAM_WIDTH;
-            UnicamBase->u_FullSize.height = UNICAM_HEIGHT;
-            UnicamBase->u_Mode = UNICAM_MODE;
-            UnicamBase->u_BPP = UNICAM_BPP;
+            UnicamBase->u_FullSize.width = 0;
+            UnicamBase->u_FullSize.height = 0;
+            UnicamBase->u_Mode = 0;
+            UnicamBase->u_BPP = 0;
             UnicamBase->u_Size = UnicamBase->u_FullSize;
             UnicamBase->u_Phase = 64;
             UnicamBase->u_Scaler = 3;
@@ -233,7 +233,7 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
 
             if (UnicamBase->u_ReceiveBuffer == NULL)
             {
-                const ULONG size = sizeof(ULONG) * UNICAM_HEIGHT * UNICAM_WIDTH + 512;
+                const ULONG size = sizeof(ULONG) * UnicamBase->u_FullSize.width * UnicamBase->u_FullSize.height + 512;
                 
                 UnicamBase->u_ReceiveBuffer = AllocMem(size, MEMF_FAST);
                 UnicamBase->u_ReceiveBufferSize = size;

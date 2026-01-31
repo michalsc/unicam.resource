@@ -13,11 +13,6 @@
 #define UNICAM_REVISION ${PROJECT_VERSION_MINOR}
 #define UNICAM_PRIORITY 118
 
-#define UNICAM_MODE     0x22
-#define UNICAM_WIDTH    720
-#define UNICAM_HEIGHT   576
-#define UNICAM_BPP      16
-
 struct Size {
     UWORD width;
     UWORD height;
