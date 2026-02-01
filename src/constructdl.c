@@ -29,6 +29,8 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
     ULONG cnt = 0;
     volatile ULONG *base = &dlist[offset];
 
+    //bug("[unicam] UnicamConstructDL(%08lx, %lx)\n", (ULONG)dlist, offset);
+
     /* If no display list base was given, return required size for display list */
     if (dlist == NULL) {
         if (UnicamBase->u_IsVC6) {

@@ -73,13 +73,13 @@ void kprintf(REGARG(const char * msg, "a0"), REGARG(void * args, "a1"));
 static inline void wr32le(volatile ULONG *addr, ULONG value) {
     *addr = LE32(value);
     asm volatile("nop");
-    bug("[unicam] wr32le(%08lx, %08lx)\n", (ULONG)addr, value);
+    //bug("[unicam] wr32le(%08lx, %08lx)\n", (ULONG)addr, value);
 }
 
 static inline ULONG rd32le(volatile ULONG *addr) {
     ULONG val = LE32(*addr);
     asm volatile("nop");
-    bug("[unicam] rd32le(%08lx) -> %08lx\n", (ULONG)addr, val);
+    //bug("[unicam] rd32le(%08lx) -> %08lx\n", (ULONG)addr, val);
     return val;
 }
 
