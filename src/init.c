@@ -113,6 +113,16 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
 
             key = DT_OpenKey("/emu68/unicam");
 
+            /* If /emu68/unicam does not exist then do not initialize unicam.resource at all */
+            if (key == NULL)
+            {
+                FreeMem(base_pointer, BASE_NEG_SIZE + BASE_POS_SIZE);
+                
+                CloseLibrary((struct Library *)ExpansionBase);
+                
+                return NULL;
+            }
+
             const char *cmdline = DT_GetPropValue(DT_FindProperty(DT_OpenKey("/chosen"), "bootargs"));
             const char *cmd;
 
