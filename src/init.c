@@ -253,6 +253,11 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
 
             bug("[unicam] Receive buffer: %08lx, size: %08lx\n", (ULONG)UnicamBase->u_ReceiveBuffer, UnicamBase->u_ReceiveBufferSize);
 
+            while (UnicamBase->u_DisplaySize.width == 0 || UnicamBase->u_DisplaySize.height == 0)
+            {
+                UnicamBase->u_DisplaySize = get_display_size(UnicamBase);
+            }
+
             AddResource(UnicamBase);
 
             if (start_on_boot)
@@ -274,11 +279,6 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
                     UnicamBase->u_Mode, 
                     UnicamBase->u_FullSize.width, UnicamBase->u_FullSize.height,
                     UnicamBase->u_BPP);
-
-                while (UnicamBase->u_DisplaySize.width == 0 || UnicamBase->u_DisplaySize.height == 0)
-                {
-                    UnicamBase->u_DisplaySize = get_display_size(UnicamBase);
-                }
 
                 if (UnicamBase->u_Smooth)
                 {
