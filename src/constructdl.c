@@ -84,6 +84,14 @@ ULONG L_UnicamConstructDL(REGARG(ULONG * dlist, "a0"), REGARG(ULONG offset, "d0"
         calc_width = (0x10000 * UnicamBase->u_Size.width) / scale_x;
         calc_height = (0x10000 * UnicamBase->u_Size.height) / scale_y;
 
+        if (calc_width > UnicamBase->u_DisplaySize.width) {
+            calc_width = UnicamBase->u_DisplaySize.width;
+        }
+
+        if (calc_height > UnicamBase->u_DisplaySize.height) {
+            calc_height = UnicamBase->u_DisplaySize.height;
+        }
+
         offset_x = (UnicamBase->u_DisplaySize.width - calc_width) >> 1;
         offset_y = (UnicamBase->u_DisplaySize.height - calc_height) >> 1;
     }
