@@ -21,6 +21,7 @@
 #include "smoothing.h"
 #include "mbox.h"
 #include "videocore.h"
+#include "rga_host.h"
 
 extern const char deviceName[];
 extern const char deviceIdString[];
@@ -56,6 +57,8 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
             BYTE start_on_boot = 0;
             APTR key;
             ULONG relFuncTable[UNICAM_FUNC_COUNT + 1];
+            ULONG scanl = 0;
+            ULONG lscanl = 0;
 
             relFuncTable[0] = (ULONG)&L_UnicamStart;
             relFuncTable[1] = (ULONG)&L_UnicamStop;
@@ -143,6 +146,9 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
             UnicamBase->u_KernelB = kernel >> 16;
             UnicamBase->u_KernelC = kernel & 0xffff;
             UnicamBase->u_Aspect = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "aspect-ratio"));
+
+            scanl = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "scanlines"));
+            lscanl = *(ULONG *)DT_GetPropValue(DT_FindProperty(key, "laced-scanlines"));
 
             if (DT_FindProperty(key, "smoothing"))
             {
@@ -273,6 +279,10 @@ APTR Init(REGARG(struct ExecBase *SysBase, "a6"))
                 
                 if (UnicamBase->u_Type == TYPE_C790) {
                     init_c790_ic(UnicamBase);
+                }
+                else if (UnicamBase->u_Type == TYPE_FT) {
+                    rga_flush_pipe();
+                    rga_set_scanlines(scanl, lscanl);
                 }
 
                 UnicamStart(UnicamBase->u_ReceiveBuffer, 1, 

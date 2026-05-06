@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14.0)
-project(unicam VERSION 1.6.0)
+project(unicam VERSION 1.7.0)
 
 include(cmake/bin2h.cmake)
 include(cmake/verstring.cmake)
@@ -33,6 +33,7 @@ add_executable(unicam.resource
     src/getsize.c
     src/constructdl.c
     src/setconfig.c
+    src/rga_host.c
 )
 
 bin_to_header(unicam.resource)
